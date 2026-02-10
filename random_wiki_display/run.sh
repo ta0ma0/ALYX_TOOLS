@@ -6,9 +6,10 @@ PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # 2. Переходим в директорию проекта (чтобы скрипт видел .env и json-файлы)
 cd "$PROJECT_DIR"
+cd ".."
 
 # 3. Определяем путь к Python внутри venv
-VENV_PYTHON="$PROJECT_DIR/random_wiki_display/venv/bin/python"
+VENV_PYTHON="$PROJECT_DIR/venv/bin/python"
 SCRIPT_FILE="get_wiki.py"  # Твой основной файл
 
 # 4. Проверка: существует ли виртуальное окружение?
