@@ -1,0 +1,4 @@
+.venv
+logs
+logs/bluetooth_sender.log
+__pycache__/ble_send.cpython-312.pyc

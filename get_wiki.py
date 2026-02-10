@@ -1,61 +1,113 @@
 import requests
 from bs4 import BeautifulSoup
+from ble_send import send_list_via_bluetooth
+import asyncio
 
-def get_random_wiki_fact(max_chars=180):
+def clean_typography(text):
+    """
+    Заменяет сложные типографские символы на простые ASCII (или близкие к ним),
+    которые переварит простой шрифт Arduino.
+    """
+    if not text:
+        return ""
+        
+    replacements = {
+        # Тире и дефисы
+        '—': '-',    # Длинное тире (em dash)
+        '–': '-',    # Среднее тире (en dash)
+        '−': '-',    # Минус
+        
+        # Кавычки
+        '«': '"',    # Елочки левые
+        '»': '"',    # Елочки правые
+        '“': '"',    # Лапки левые
+        '”': '"',    # Лапки правые
+        '‘': "'",    # Одинарная левая
+        '’': "'",    # Одинарная правая
+        
+        # Пробелы и спецсимволы
+        '\xa0': ' ', # Неразрывный пробел (часто встречается в Вики)
+        '…': '...',  # Символ троеточия (один знак -> три знака)
+        '\u0301': '', # Знак ударения (бывает над буквами)
+    }
+    
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    
+    return text
+
+def get_random_wiki_fact(max_chars=250):
     url = "https://ru.wikipedia.org/wiki/Служебная:Случайная_страница"
     
-    # Википедия требует User-Agent, иначе вернет 403 Forbidden
     headers = {
         'User-Agent': 'ALYX_Agent/1.0 (educational project; python-requests)'
     }
 
     try:
         response = requests.get(url, headers=headers)
-        response.raise_for_status() # Проверка на ошибки сети
+        response.raise_for_status()
         
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # 1. Получаем заголовок (h1)
+        # 1. Получаем заголовок
         title_tag = soup.find(id="firstHeading")
-        title = title_tag.text.strip() if title_tag else "Без названия"
+        raw_title = title_tag.text.strip() if title_tag else "Без названия"
         
-        # 2. Ищем первый нормальный абзац текста
-        # Ищем внутри основного контента
+        # --- ЧИСТИМ ЗАГОЛОВОК СРАЗУ ---
+        title = clean_typography(raw_title)
+        
+        # 2. Ищем текст
         content_div = soup.find('div', id='mw-content-text')
         excerpt = ""
         
         if content_div:
-            # Парсим параграфы
             paragraphs = content_div.select('.mw-parser-output > p')
             for p in paragraphs:
-                text = p.text.strip()
-                # Пропускаем пустые абзацы или координаты
-                if text and len(text) > 20: 
-                    excerpt = text
+                raw_text = p.text.strip()
+                # Сначала проверяем длину "грязного" текста, чтобы не обрабатывать мусор
+                if raw_text and len(raw_text) > 20:
+                    # --- ЧИСТИМ ТЕКСТ ---
+                    clean_text = clean_typography(raw_text)
+                    excerpt = clean_text
                     break
         
-        # 3. Формируем итоговый текст и обрезаем
-        # Сначала собираем полную строку
-        full_text = f"{title}\n{excerpt}"
+        # 3. Логика обрезки (теперь работаем только с очищенным текстом)
         
-        # Если вышли за лимит, обрезаем и ставим многоточие
-        if len(full_text) > max_chars:
-            # Оставляем место под троеточие (3 символа)
-            full_text = full_text[:max_chars-3] + "..."
-            
-        # 4. Считаем остаток
-        remaining_chars = max_chars - len(full_text)
+        # Если заголовок слишком длинный
+        if len(title) >= max_chars:
+            title = title[:max_chars-3] + "..."
+            return [title, ""]
+
+        remaining_space = max_chars - len(title) - 1
         
-        # Возвращаем список: [Текст, Остаток символов]
-        return [full_text, remaining_chars]
+        final_text = ""
+        
+        if excerpt:
+            if len(excerpt) > remaining_space:
+                if remaining_space > 3:
+                    final_text = excerpt[:remaining_space-3] + "..."
+                else:
+                    final_text = "" 
+            else:
+                final_text = excerpt
+
+        return [title, final_text]
 
     except Exception as e:
-        return [f"Ошибка получения данных: {e}", 0]
+        return ["Ошибка Вики", str(e)[:100]]
 
-# --- Тест для ALYX ---
-if __name__ == "__main__":
-    result = get_random_wiki_fact()
-    print(f"Результат (List): {result}")
+async def main():
+    # Ставим лимит побольше, раз у нас теперь есть разбиение на чанки в ble_send
+    result = get_random_wiki_fact(500) 
+    
+    print(f"Заголовок: {result[0]}")
+    print(f"Текст: {result[1]}")
     print("-" * 20)
-    print(f"Вывод:\n{result[0]}")
-    print(f"\nСвободного места: {result[1]}")
+    
+    if result:
+        await send_list_via_bluetooth(result)
+    else:
+        print("Список пуст.")
+    
+if __name__ == "__main__":
+    asyncio.run(main())
