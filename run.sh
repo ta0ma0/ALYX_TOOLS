@@ -9,7 +9,7 @@ cd "$PROJECT_DIR"
 
 # 3. Определяем путь к Python внутри venv
 VENV_PYTHON="$PROJECT_DIR/venv/bin/python"
-SCRIPT_FILE="isthereanydeal.py"  # Твой основной файл
+SCRIPT_FILE="get_wiki.py"  # Твой основной файл
 
 # 4. Проверка: существует ли виртуальное окружение?
 if [ ! -f "$VENV_PYTHON" ]; then
