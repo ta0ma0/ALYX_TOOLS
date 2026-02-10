@@ -17,17 +17,8 @@ ENV_FILE="$PROJECT_DIR/.env"
 echo -e "${GREEN}[*] Запуск автоматической установки FreeGames Notifier...${NC}"
 echo -e "${YELLOW}[i] Директория проекта: $PROJECT_DIR${NC}"
 
-# 1. ПРОВЕРКА .ENV
-if [ ! -f "$ENV_FILE" ]; then
-    echo -e "${RED}[!] Файл .env не найден!${NC}"
-    echo "    Сначала создайте .env и добавьте туда API_KEY."
-    echo "    Пример: cp .env.example .env"
-    exit 1
-else
-    echo -e "${GREEN}[+] .env обнаружен.${NC}"
-fi
 
-# 2. СОЗДАНИЕ ВИРТУАЛЬНОГО ОКРУЖЕНИЯ
+# 1. СОЗДАНИЕ ВИРТУАЛЬНОГО ОКРУЖЕНИЯ
 if [ -d "$VENV_DIR" ]; then
     echo -e "${YELLOW}[i] Виртуальное окружение (venv) уже существует. Пропускаю создание.${NC}"
 else
@@ -40,7 +31,7 @@ else
      echo -e "${GREEN}[+] venv создан успешно.${NC}"
 fi
 
-# 3. УСТАНОВКА ЗАВИСИМОСТЕЙ
+# 2. УСТАНОВКА ЗАВИСИМОСТЕЙ
 if [ -f "$REQ_FILE" ]; then
     echo -e "${GREEN}[*] Устанавливаю зависимости из requirements.txt...${NC}"
     "$VENV_DIR/bin/pip" install -r "$REQ_FILE"
@@ -54,13 +45,13 @@ else
     exit 1
 fi
 
-# 4. НАСТРОЙКА ПРАВ ДОСТУПА
+# 3. НАСТРОЙКА ПРАВ ДОСТУПА
 echo -e "${GREEN}[*] Выдаю права на выполнение скриптам...${NC}"
 chmod +x "$RUN_SCRIPT" 2>/dev/null
 chmod +x "$PROJECT_DIR/isthereanydeal.py" 2>/dev/null # или как называется твой главный скрипт
 echo -e "${GREEN}[+] Права выданы: chmod +x run.sh${NC}"
 
-# 5. ДОБАВЛЕНИЕ В CRON (САМОЕ ИНТЕРЕСНОЕ)
+# 4. ДОБАВЛЕНИЕ В CRON (САМОЕ ИНТЕРЕСНОЕ)
 CRON_CMD="0 10 * * * $RUN_SCRIPT"
 
 # Проверяем, есть ли уже такая задача, чтобы не плодить дубли
