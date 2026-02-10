@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from ble_send import send_list_via_bluetooth
+from random_wiki_display.ble_send import send_list_via_bluetooth
 import asyncio
 
 def clean_typography(text):
