@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from random_wiki_display.ble_send import send_list_via_bluetooth
+from ble_send import send_list_via_bluetooth
 import asyncio
 
 def clean_typography(text):
@@ -36,7 +36,7 @@ def clean_typography(text):
     
     return text
 
-def get_random_wiki_fact(max_chars=250):
+def get_random_wiki_fact(max_chars=220):
     url = "https://ru.wikipedia.org/wiki/Служебная:Случайная_страница"
     
     headers = {
