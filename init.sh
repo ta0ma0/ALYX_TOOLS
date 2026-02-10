@@ -52,7 +52,7 @@ chmod +x "$PROJECT_DIR/isthereanydeal.py" 2>/dev/null # или как назыв
 echo -e "${GREEN}[+] Права выданы: chmod +x run.sh${NC}"
 
 # 4. ДОБАВЛЕНИЕ В CRON (САМОЕ ИНТЕРЕСНОЕ)
-CRON_CMD="0 10 * * * $RUN_SCRIPT"
+CRON_CMD="30 * * * * $RUN_SCRIPT"
 
 # Проверяем, есть ли уже такая задача, чтобы не плодить дубли
 (crontab -l 2>/dev/null | grep -F "$RUN_SCRIPT") >/dev/null
