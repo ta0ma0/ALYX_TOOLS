@@ -36,7 +36,7 @@ def clean_typography(text):
     
     return text
 
-def get_random_wiki_fact(max_chars=220):
+def get_random_wiki_fact(max_chars=180):
     url = "https://ru.wikipedia.org/wiki/Служебная:Случайная_страница"
     
     headers = {
