@@ -1,5 +1,8 @@
 .venv
-logs
+logs/*
 logs/bluetooth_sender.log
-__pycache__/ble_send.cpython-312.pyc
-random_wiki_display/__pycache__/
+__pycache__/*
+random_wiki_display/__pycache__/*
+random_wiki_display/venv/*
+venv/*
+*.log
